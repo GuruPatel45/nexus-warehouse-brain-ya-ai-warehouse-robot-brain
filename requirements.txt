@@ -1,0 +1,9 @@
+numpy
+matplotlib
+pgmpy
+scikit-fuzzy
+torch
+pandas
+scikit-learn
+networkx
+streamlit
