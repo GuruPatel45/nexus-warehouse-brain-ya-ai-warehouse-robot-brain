@@ -53,8 +53,13 @@ def generate_shift_log(n_events: int = 75, seed: int = 42) -> List[Dict[str, Any
         events.append(event)
 
     # Write to data/shift_log.json
-    data_dir = os.path.join(os.path.dirname(
-        os.path.dirname(os.path.abspath(__file__))), "data")
+    root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    candidate_dirs = [
+        os.path.join(root_dir, "data"),
+        os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data"),
+        os.path.abspath("data"),
+    ]
+    data_dir = next((d for d in candidate_dirs if os.path.isdir(d)), candidate_dirs[0])
     os.makedirs(data_dir, exist_ok=True)
 
     log_path = os.path.join(data_dir, "shift_log.json")

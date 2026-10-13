@@ -20,8 +20,13 @@ def run(shift_log: list[dict]) -> None:
     print(f"Starting control loop with {len(shift_log)} events...\n")
 
     # Pre-load for module A
-    data_dir = os.path.join(os.path.dirname(
-        os.path.dirname(os.path.abspath(__file__))), "data")
+    root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    candidate_dirs = [
+        os.path.join(root_dir, "data"),
+        os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data"),
+        os.path.abspath("data"),
+    ]
+    data_dir = next((d for d in candidate_dirs if os.path.exists(os.path.join(d, "start.json"))), candidate_dirs[0])
     start_path = os.path.join(data_dir, "start.json")
     goal_path = os.path.join(data_dir, "goal.json")
 
