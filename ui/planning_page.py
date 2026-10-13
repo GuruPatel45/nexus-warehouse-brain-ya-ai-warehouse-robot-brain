@@ -63,16 +63,17 @@ def render_block_tower(state_data, label):
     on_dict = state_data.get("on", {})
     holding = state_data.get("holding")
     
-    html = f"""
-    <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 12px; padding: 1rem; margin-top: 0.5rem;">
-        <div style="font-weight: 700; font-size: 0.85rem; color: #00f2fe; text-transform: uppercase; margin-bottom: 0.8rem; letter-spacing: 0.05em;">{label}</div>
-        <div style="display: flex; gap: 1.5rem; align-items: flex-end; justify-content: center; min-height: 120px; padding: 10px; border-bottom: 3px solid #7928ca;">
-    """
+    # 1. Infer all blocks
+    all_blocks = set(on_dict.keys()) | {v for v in on_dict.values() if v and v != "PALLET"}
     
-    # Simple tower parser
-    pallet_bases = [b for b, below in on_dict.items() if below == "PALLET"]
-    for base in sorted(pallet_bases):
-        # find tower up
+    # 2. A block is a base if it rests on PALLET or is not on any other block
+    bases = [b for b in all_blocks if on_dict.get(b) == "PALLET" or b not in on_dict]
+    if not bases and all_blocks:
+        # Fallback if circular or partial: pick lowest blocks
+        bases = list(all_blocks)
+        
+    towers = []
+    for base in sorted(bases):
         tower = [base]
         curr = base
         while True:
@@ -82,27 +83,51 @@ def render_block_tower(state_data, label):
                 tower.append(curr)
             else:
                 break
+        towers.append(tower)
         
-        html += '<div style="display: flex; flex-direction: column-reverse; align-items: center; gap: 4px;">'
-        colors = {"A": "#00f2fe", "B": "#7928ca", "C": "#00f5a0", "D": "#f59e0b", "E": "#ff007a"}
-        for b in tower:
+    colors = {"A": "#00f2fe", "B": "#b388ff", "C": "#00f5a0", "D": "#f59e0b", "E": "#ff007a"}
+    
+    html = f"""
+    <div style="background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(0, 242, 254, 0.25); border-radius: 14px; padding: 1.2rem; margin-top: 0.5rem; box-shadow: 0 8px 25px rgba(0,0,0,0.4);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+            <div style="font-weight: 700; font-size: 0.85rem; color: #00f2fe; text-transform: uppercase; letter-spacing: 0.06em;">{label}</div>
+            <div style="font-size: 0.75rem; color: #94a3b8; font-family: 'Space Grotesk', sans-serif;">{len(towers)} Tower Stack(s)</div>
+        </div>
+        <div style="display: flex; gap: 2rem; align-items: flex-end; justify-content: center; min-height: 150px; padding: 15px 10px 10px 10px; border-bottom: 3px solid #00f2fe; background: radial-gradient(circle at 50% 100%, rgba(0, 242, 254, 0.08) 0%, transparent 70%);">
+    """
+    
+    for tower in towers:
+        # tower is [base, ..., top]
+        # In flex-direction: column, top block is rendered first down to base
+        blocks_top_down = list(reversed(tower))
+        
+        html += '<div style="display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 5px;">'
+        for b in blocks_top_down:
             c = colors.get(b, "#38bdf8")
             html += f"""
-            <div style="width: 44px; height: 32px; background: rgba(15, 23, 42, 0.9); border: 2px solid {c}; 
-                        box-shadow: 0 0 10px {c}44; border-radius: 6px; display: flex; align-items: center; 
-                        justify-content: center; font-weight: 800; color: #ffffff; font-size: 0.95rem;">
+            <div style="width: 52px; height: 36px; background: rgba(15, 23, 42, 0.95); border: 2px solid {c}; 
+                        box-shadow: 0 0 14px {c}55; border-radius: 7px; display: flex; align-items: center; 
+                        justify-content: center; font-weight: 800; color: #ffffff; font-size: 1.05rem; font-family: 'Space Grotesk', sans-serif;">
                 {b}
             </div>
             """
-        html += '<div style="font-size: 0.7rem; color: #64748b; margin-top: 4px; font-weight: 600;">PALLET</div></div>'
-    
+        # Pallet floor platform
+        html += """
+            <div style="width: 66px; height: 8px; background: linear-gradient(90deg, #334155, #64748b, #334155); border-radius: 3px; margin-top: 3px; box-shadow: 0 2px 6px rgba(0,0,0,0.5);"></div>
+            <div style="font-size: 0.65rem; color: #94a3b8; font-weight: 700; letter-spacing: 0.05em; margin-top: 2px;">PALLET</div>
+        </div>
+        """
+        
     if holding:
+        c = colors.get(holding, "#f59e0b")
         html += f"""
-        <div style="display: flex; flex-direction: column; align-items: center; margin-left: 1rem;">
-            <div style="font-size: 0.7rem; color: #f59e0b; font-weight: 700;">GRIPPER HOLD</div>
-            <div style="width: 44px; height: 32px; background: rgba(245, 158, 11, 0.2); border: 2px dashed #f59e0b; 
-                        border-radius: 6px; display: flex; align-items: center; justify-content: center; 
-                        font-weight: 800; color: #ffffff; margin-top: 4px;">{holding}</div>
+        <div style="display: flex; flex-direction: column; align-items: center; margin-left: 1.5rem; align-self: flex-start;">
+            <div style="font-size: 0.7rem; color: #f59e0b; font-weight: 800; letter-spacing: 0.05em; margin-bottom: 4px;">⚡ GRIPPER HOLD</div>
+            <div style="width: 52px; height: 36px; background: rgba(245, 158, 11, 0.2); border: 2px dashed #f59e0b; 
+                        border-radius: 7px; display: flex; align-items: center; justify-content: center; 
+                        font-weight: 800; color: #ffffff; font-size: 1.05rem; box-shadow: 0 0 12px rgba(245, 158, 11, 0.35);">
+                {holding}
+            </div>
         </div>
         """
         
@@ -114,7 +139,7 @@ def render_block_tower(state_data, label):
 
 st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
 
-if st.button("🚀 SYNTHESIZE & EXECUTE ROBOTIC PLANS", type="primary", use_container_width=True):
+if st.button("🚀 SYNTHESIZE & EXECUTE ROBOTIC PLANS", type="primary"):
     try:
         start_data = json.loads(start_json)
         goal_data = json.loads(goal_json)
@@ -145,15 +170,20 @@ if st.button("🚀 SYNTHESIZE & EXECUTE ROBOTIC PLANS", type="primary", use_cont
             with m_col1:
                 st.metric(label="Sequential Actions", value=f"{len(plan)} Steps")
             with m_col2:
-                # Render formatted plan cards
+                # Render formatted plan cards with operator icons
+                op_icons = {"UNSTACK": "📤", "STACK": "📥", "PICKUP": "🦾", "PUTDOWN": "📦"}
                 steps_html = "<div style='display: flex; flex-direction: column; gap: 8px; margin-top: 0.5rem;'>"
                 for idx, action in enumerate(plan):
                     act_name = action[0]
                     act_args = ", ".join(action[1:])
+                    icon = op_icons.get(act_name, "⚡")
                     steps_html += f"""
-                    <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(0, 242, 254, 0.25); border-left: 4px solid #00f2fe; border-radius: 8px; padding: 0.6rem 1rem; display: flex; align-items: center; justify-content: space-between;">
-                        <span style="font-weight: 700; color: #00f2fe; font-family: 'Space Grotesk', monospace;">STEP {idx+1}</span>
-                        <span style="font-weight: 700; color: #ffffff; font-family: 'JetBrains Mono', monospace;">{act_name}(<span style="color: #b388ff;">{act_args}</span>)</span>
+                    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(0, 242, 254, 0.25); border-left: 4px solid #00f2fe; border-radius: 8px; padding: 0.65rem 1.1rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 1.1rem;">{icon}</span>
+                            <span style="font-weight: 700; color: #00f2fe; font-family: 'Space Grotesk', monospace; font-size: 0.85rem;">STEP {idx+1}</span>
+                        </div>
+                        <span style="font-weight: 700; color: #ffffff; font-family: 'JetBrains Mono', monospace; font-size: 0.95rem;">{act_name}(<span style="color: #b388ff;">{act_args}</span>)</span>
                     </div>
                     """
                 steps_html += "</div>"

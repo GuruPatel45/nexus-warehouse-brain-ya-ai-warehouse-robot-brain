@@ -17,7 +17,7 @@ if os.path.exists(banner_path):
     <div style="border-radius: 16px; overflow: hidden; border: 1px solid rgba(0, 242, 254, 0.25); 
                 box-shadow: 0 12px 35px rgba(0,0,0,0.6); margin-bottom: 2rem;">
     """, unsafe_allow_html=True)
-    st.image(banner_path, use_container_width=True)
+    st.image(banner_path)
     st.markdown("</div>", unsafe_allow_html=True)
 
 # Executive Live Metrics Row
