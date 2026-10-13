@@ -341,57 +341,64 @@ code, pre, .stCodeBlock {
 </style>
 """
 
+import textwrap
+
+def clean_html(html_str: str) -> str:
+    """Strip leading indentation to prevent markdown parser from treating HTML as code block."""
+    return textwrap.dedent(html_str).strip()
+
 def inject_theme():
     """Inject global CSS theme rules into current Streamlit page."""
-    st.markdown(CYBER_CSS, unsafe_allow_html=True)
+    st.markdown(clean_html(CYBER_CSS), unsafe_allow_html=True)
 
 def render_page_header(title: str, subtitle: str, badge: str = "SYSTEM ACTIVE", icon: str = "⚡"):
     """Render a premium unified header banner for any module page."""
     inject_theme()
     header_html = f"""
-    <div style="margin-bottom: 2rem; padding: 1.5rem 0 0.8rem 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
-        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
-            <div>
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
-                    <span style="font-size: 2rem;">{icon}</span>
-                    <h1 style="margin: 0; font-size: 2.4rem; font-weight: 800; letter-spacing: -0.02em; 
-                               background: linear-gradient(135deg, #ffffff 40%, #00f2fe 100%); 
-                               -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                        {title}
-                    </h1>
-                </div>
-                <p style="margin: 0; color: #94a3b8; font-size: 1.05rem; font-weight: 400; max-width: 800px;">
-                    {subtitle}
-                </p>
+<div style="margin-bottom: 2rem; padding: 1.5rem 0 0.8rem 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+                <span style="font-size: 2rem;">{icon}</span>
+                <h1 style="margin: 0; font-size: 2.4rem; font-weight: 800; letter-spacing: -0.02em; 
+                           background: linear-gradient(135deg, #ffffff 40%, #00f2fe 100%); 
+                           -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    {title}
+                </h1>
             </div>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <div class="cyber-badge badge-cyan">
-                    <span class="pulse-dot"></span>
-                    <span>{badge}</span>
-                </div>
-                <div class="cyber-badge badge-purple">
-                    <span>AGV COGNITION v2.5</span>
-                </div>
+            <p style="margin: 0; color: #94a3b8; font-size: 1.05rem; font-weight: 400; max-width: 800px;">
+                {subtitle}
+            </p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="cyber-badge badge-cyan">
+                <span class="pulse-dot"></span>
+                <span>{badge}</span>
+            </div>
+            <div class="cyber-badge badge-purple">
+                <span>AGV COGNITION v2.5</span>
             </div>
         </div>
     </div>
-    """
-    st.markdown(header_html, unsafe_allow_html=True)
+</div>
+"""
+    st.markdown(clean_html(header_html), unsafe_allow_html=True)
 
 def render_cyber_card(title: str, content_html: str, badge: str = None, color: str = "cyan"):
     """Render a glassmorphic cyber-styled container card."""
     badge_html = f'<div class="cyber-badge badge-{color}">{badge}</div>' if badge else ""
     card_html = f"""
-    <div class="cyber-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #f8fafc; font-family: 'Space Grotesk', sans-serif;">
-                {title}
-            </h3>
-            {badge_html}
-        </div>
-        <div>
-            {content_html}
-        </div>
+<div class="cyber-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #f8fafc; font-family: 'Space Grotesk', sans-serif;">
+            {title}
+        </h3>
+        {badge_html}
     </div>
-    """
-    st.markdown(card_html, unsafe_allow_html=True)
+    <div>
+        {content_html}
+    </div>
+</div>
+"""
+    st.markdown(clean_html(card_html), unsafe_allow_html=True)
+

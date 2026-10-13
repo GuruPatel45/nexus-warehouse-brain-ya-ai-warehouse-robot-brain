@@ -69,7 +69,6 @@ def render_block_tower(state_data, label):
     # 2. A block is a base if it rests on PALLET or is not on any other block
     bases = [b for b in all_blocks if on_dict.get(b) == "PALLET" or b not in on_dict]
     if not bases and all_blocks:
-        # Fallback if circular or partial: pick lowest blocks
         bases = list(all_blocks)
         
     towers = []
@@ -87,55 +86,51 @@ def render_block_tower(state_data, label):
         
     colors = {"A": "#00f2fe", "B": "#b388ff", "C": "#00f5a0", "D": "#f59e0b", "E": "#ff007a"}
     
-    html = f"""
-    <div style="background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(0, 242, 254, 0.25); border-radius: 14px; padding: 1.2rem; margin-top: 0.5rem; box-shadow: 0 8px 25px rgba(0,0,0,0.4);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
-            <div style="font-weight: 700; font-size: 0.85rem; color: #00f2fe; text-transform: uppercase; letter-spacing: 0.06em;">{label}</div>
-            <div style="font-size: 0.75rem; color: #94a3b8; font-family: 'Space Grotesk', sans-serif;">{len(towers)} Tower Stack(s)</div>
-        </div>
-        <div style="display: flex; gap: 2rem; align-items: flex-end; justify-content: center; min-height: 150px; padding: 15px 10px 10px 10px; border-bottom: 3px solid #00f2fe; background: radial-gradient(circle at 50% 100%, rgba(0, 242, 254, 0.08) 0%, transparent 70%);">
-    """
-    
+    tower_elements = []
     for tower in towers:
-        # tower is [base, ..., top]
-        # In flex-direction: column, top block is rendered first down to base
         blocks_top_down = list(reversed(tower))
-        
-        html += '<div style="display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 5px;">'
+        b_html = []
         for b in blocks_top_down:
             c = colors.get(b, "#38bdf8")
-            html += f"""
-            <div style="width: 52px; height: 36px; background: rgba(15, 23, 42, 0.95); border: 2px solid {c}; 
-                        box-shadow: 0 0 14px {c}55; border-radius: 7px; display: flex; align-items: center; 
-                        justify-content: center; font-weight: 800; color: #ffffff; font-size: 1.05rem; font-family: 'Space Grotesk', sans-serif;">
-                {b}
-            </div>
-            """
-        # Pallet floor platform
-        html += """
-            <div style="width: 66px; height: 8px; background: linear-gradient(90deg, #334155, #64748b, #334155); border-radius: 3px; margin-top: 3px; box-shadow: 0 2px 6px rgba(0,0,0,0.5);"></div>
-            <div style="font-size: 0.65rem; color: #94a3b8; font-weight: 700; letter-spacing: 0.05em; margin-top: 2px;">PALLET</div>
-        </div>
-        """
-        
+            b_html.append(
+                f'<div style="width: 54px; height: 38px; background: rgba(15, 23, 42, 0.95); border: 2px solid {c}; '
+                f'box-shadow: 0 0 14px {c}55; border-radius: 7px; display: flex; align-items: center; '
+                f'justify-content: center; font-weight: 800; color: #ffffff; font-size: 1.1rem; font-family: sans-serif;">{b}</div>'
+            )
+        b_str = "".join(b_html)
+        tower_elements.append(
+            f'<div style="display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 5px;">'
+            f'{b_str}'
+            f'<div style="width: 68px; height: 8px; background: linear-gradient(90deg, #334155, #64748b, #334155); border-radius: 3px; margin-top: 3px;"></div>'
+            f'<div style="font-size: 0.65rem; color: #94a3b8; font-weight: 700; letter-spacing: 0.05em; margin-top: 2px;">PALLET</div>'
+            f'</div>'
+        )
+    
+    towers_combined = "".join(tower_elements)
+    
+    holding_html = ""
     if holding:
         c = colors.get(holding, "#f59e0b")
-        html += f"""
-        <div style="display: flex; flex-direction: column; align-items: center; margin-left: 1.5rem; align-self: flex-start;">
-            <div style="font-size: 0.7rem; color: #f59e0b; font-weight: 800; letter-spacing: 0.05em; margin-bottom: 4px;">⚡ GRIPPER HOLD</div>
-            <div style="width: 52px; height: 36px; background: rgba(245, 158, 11, 0.2); border: 2px dashed #f59e0b; 
-                        border-radius: 7px; display: flex; align-items: center; justify-content: center; 
-                        font-weight: 800; color: #ffffff; font-size: 1.05rem; box-shadow: 0 0 12px rgba(245, 158, 11, 0.35);">
-                {holding}
-            </div>
-        </div>
-        """
+        holding_html = (
+            f'<div style="display: flex; flex-direction: column; align-items: center; margin-left: 1.5rem; align-self: flex-start;">'
+            f'<div style="font-size: 0.7rem; color: #f59e0b; font-weight: 800; letter-spacing: 0.05em; margin-bottom: 4px;">⚡ GRIPPER</div>'
+            f'<div style="width: 54px; height: 38px; background: rgba(245, 158, 11, 0.2); border: 2px dashed #f59e0b; '
+            f'border-radius: 7px; display: flex; align-items: center; justify-content: center; '
+            f'font-weight: 800; color: #ffffff; font-size: 1.1rem; box-shadow: 0 0 12px rgba(245, 158, 11, 0.35);">{holding}</div>'
+            f'</div>'
+        )
         
-    html += """
-        </div>
-    </div>
-    """
-    return html
+    full_html = (
+        f'<div style="background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(0, 242, 254, 0.25); border-radius: 14px; padding: 1.2rem; margin-top: 0.5rem; box-shadow: 0 8px 25px rgba(0,0,0,0.4);">'
+        f'<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">'
+        f'<div style="font-weight: 700; font-size: 0.85rem; color: #00f2fe; text-transform: uppercase; letter-spacing: 0.06em;">{label}</div>'
+        f'<div style="font-size: 0.75rem; color: #94a3b8;">{len(towers)} Tower Stack(s)</div>'
+        f'</div>'
+        f'<div style="display: flex; gap: 2rem; align-items: flex-end; justify-content: center; min-height: 150px; padding: 15px 10px 10px 10px; border-bottom: 3px solid #00f2fe; background: radial-gradient(circle at 50% 100%, rgba(0, 242, 254, 0.08) 0%, transparent 70%);">'
+        f'{towers_combined}{holding_html}'
+        f'</div></div>'
+    )
+    return full_html
 
 st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
 
@@ -172,21 +167,21 @@ if st.button("🚀 SYNTHESIZE & EXECUTE ROBOTIC PLANS", type="primary"):
             with m_col2:
                 # Render formatted plan cards with operator icons
                 op_icons = {"UNSTACK": "📤", "STACK": "📥", "PICKUP": "🦾", "PUTDOWN": "📦"}
-                steps_html = "<div style='display: flex; flex-direction: column; gap: 8px; margin-top: 0.5rem;'>"
+                step_cards = []
                 for idx, action in enumerate(plan):
                     act_name = action[0]
                     act_args = ", ".join(action[1:])
                     icon = op_icons.get(act_name, "⚡")
-                    steps_html += f"""
-                    <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(0, 242, 254, 0.25); border-left: 4px solid #00f2fe; border-radius: 8px; padding: 0.65rem 1.1rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span style="font-size: 1.1rem;">{icon}</span>
-                            <span style="font-weight: 700; color: #00f2fe; font-family: 'Space Grotesk', monospace; font-size: 0.85rem;">STEP {idx+1}</span>
-                        </div>
-                        <span style="font-weight: 700; color: #ffffff; font-family: 'JetBrains Mono', monospace; font-size: 0.95rem;">{act_name}(<span style="color: #b388ff;">{act_args}</span>)</span>
-                    </div>
-                    """
-                steps_html += "</div>"
+                    step_cards.append(
+                        f'<div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(0, 242, 254, 0.25); border-left: 4px solid #00f2fe; border-radius: 8px; padding: 0.65rem 1.1rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">'
+                        f'<div style="display: flex; align-items: center; gap: 10px;">'
+                        f'<span style="font-size: 1.1rem;">{icon}</span>'
+                        f'<span style="font-weight: 700; color: #00f2fe; font-size: 0.85rem;">STEP {idx+1}</span>'
+                        f'</div>'
+                        f'<span style="font-weight: 700; color: #ffffff; font-family: monospace; font-size: 0.95rem;">{act_name}(<span style="color: #b388ff;">{act_args}</span>)</span>'
+                        f'</div>'
+                    )
+                steps_html = f'<div style="display: flex; flex-direction: column; gap: 8px; margin-top: 0.5rem;">{"".join(step_cards)}</div>'
                 st.markdown(steps_html, unsafe_allow_html=True)
             
             with st.expander("🔍 Deep Goal-Stack Symbolic Trace", expanded=False):
@@ -206,14 +201,16 @@ if st.button("🚀 SYNTHESIZE & EXECUTE ROBOTIC PLANS", type="primary"):
                 st.metric(label="Parallel Concurrency Layers", value=f"{len(layers)} Stages")
             
             st.markdown("##### 🔀 Concurrent Execution Stages:")
+            stage_htmls = []
             for i, layer in enumerate(layers):
                 stage_content = ", ".join([f"{a[0]}({', '.join(a[1:])})" for a in layer])
-                st.markdown(f"""
-                <div style="background: rgba(121, 40, 202, 0.15); border: 1px solid rgba(121, 40, 202, 0.4); border-radius: 10px; padding: 0.8rem 1.2rem; margin-bottom: 0.6rem; display: flex; align-items: center; justify-content: space-between;">
-                    <span class="cyber-badge badge-purple">STAGE {i+1}</span>
-                    <span style="font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #f8fafc;">{stage_content}</span>
-                </div>
-                """, unsafe_allow_html=True)
+                stage_htmls.append(
+                    f'<div style="background: rgba(121, 40, 202, 0.15); border: 1px solid rgba(121, 40, 202, 0.4); border-radius: 10px; padding: 0.8rem 1.2rem; margin-bottom: 0.6rem; display: flex; align-items: center; justify-content: space-between;">'
+                    f'<span class="cyber-badge badge-purple">STAGE {i+1}</span>'
+                    f'<span style="font-family: monospace; font-weight: 600; color: #f8fafc;">{stage_content}</span>'
+                    f'</div>'
+                )
+            st.markdown("".join(stage_htmls), unsafe_allow_html=True)
         
         with tab3:
             st.markdown("#### 🧩 Hierarchical Task Network (HTN Decomposition)")
@@ -234,21 +231,23 @@ if st.button("🚀 SYNTHESIZE & EXECUTE ROBOTIC PLANS", type="primary"):
             
             if result["reactive_log"]:
                 for line in result["reactive_log"]:
-                    st.markdown(f"""
-                    <div style="background: rgba(255, 0, 122, 0.15); border: 1px solid rgba(255, 0, 122, 0.4); border-radius: 10px; padding: 0.8rem 1.2rem; margin-bottom: 0.6rem;">
-                        <span style="color: #ff007a; font-weight: 800;">⚡ CONTINGENCY DETECTED:</span> {line}
-                    </div>
-                    """, unsafe_allow_html=True)
+                    st.markdown(
+                        f'<div style="background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; border-radius: 10px; padding: 0.8rem 1.2rem; margin-bottom: 0.6rem;">'
+                        f'<b style="color: #f59e0b;">🛡️ REACTIVE REPAIR APPLIED:</b> <span style="color: #f8fafc;">{line}</span>'
+                        f'</div>',
+                        unsafe_allow_html=True
+                    )
             else:
                 st.success("✅ Nominal Execution: No unforeseen disturbances breached preconditions.")
             
             sat = is_goal_satisfied(result['final_state'], goal_data)
             if sat:
-                st.markdown("""
-                <div style="background: rgba(0, 245, 160, 0.15); border: 1px solid rgba(0, 245, 160, 0.4); border-radius: 10px; padding: 1rem; margin-top: 1rem; text-align: center;">
-                    <span style="color: #00f5a0; font-weight: 800; font-size: 1.1rem;">🎯 GOAL FULLY RECOVERED & SATISFIED</span>
-                </div>
-                """, unsafe_allow_html=True)
+                st.markdown(
+                    '<div style="background: rgba(0, 245, 160, 0.15); border: 1px solid rgba(0, 245, 160, 0.4); border-radius: 10px; padding: 1rem; margin-top: 1rem; text-align: center;">'
+                    '<span style="color: #00f5a0; font-weight: 800; font-size: 1.1rem;">🎯 GOAL FULLY RECOVERED & SATISFIED DESPITE SIMULATED DISTURBANCE</span>'
+                    '</div>',
+                    unsafe_allow_html=True
+                )
             else:
                 st.error("❌ Physical goal was not satisfied.")
                 
