@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from ui.theme import render_page_header, render_cyber_card
+from ui.theme import render_page_header, render_cyber_card, render_html
 from modules.uncertainty.compare import TEST_CASES, evaluate_all_methods
 from modules.uncertainty.nonmonotonic import sensor_reading_to_facts
 
@@ -18,30 +18,30 @@ with tab1:
     
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.markdown("""
+        render_html("""
         <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 12px; padding: 1rem; margin-bottom: 0.5rem;">
             <div style="font-weight: 700; color: #00f2fe; font-size: 0.85rem; letter-spacing: 0.05em;">⚖️ STRAIN GAUGE</div>
             <div style="color: #94a3b8; font-size: 0.75rem;">Package Weight Deviation</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
         weight_dev = st.slider("Deviation Pct (%)", 0, 100, 25, label_visibility="collapsed")
         
     with col2:
-        st.markdown("""
+        render_html("""
         <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(121, 40, 202, 0.2); border-radius: 12px; padding: 1rem; margin-bottom: 0.5rem;">
             <div style="font-weight: 700; color: #b388ff; font-size: 0.85rem; letter-spacing: 0.05em;">👁️ OPTICAL CAMERA</div>
             <div style="color: #94a3b8; font-size: 0.75rem;">Surface Crack Severity</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
         crack_sev = st.slider("Crack Severity Pct (%)", 0, 100, 15, label_visibility="collapsed")
         
     with col3:
-        st.markdown("""
+        render_html("""
         <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(0, 245, 160, 0.2); border-radius: 12px; padding: 1rem; margin-bottom: 0.5rem;">
             <div style="font-weight: 700; color: #00f5a0; font-size: 0.85rem; letter-spacing: 0.05em;">📐 INERTIAL GYROSCOPE</div>
             <div style="color: #94a3b8; font-size: 0.75rem;">Tri-Axis Tilt Sensor Trigger</div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
         tilt = st.checkbox("Tilt Threshold Exceeded (>15°)", value=True)
         
     reading = {
@@ -72,7 +72,7 @@ with tab1:
             verdict_text = "✅ PAYLOAD NOMINAL: CLEARED FOR AUTOMATED VERTICAL STACKING"
             verdict_badge = "CLEARED / OPTIMAL"
             
-        st.markdown(f"""
+        render_html(f"""
         <div style="background: rgba(15, 23, 42, 0.85); border: 2px solid {banner_color}; border-radius: 14px; 
                     padding: 1.25rem 1.75rem; margin: 1.5rem 0; box-shadow: 0 0 25px {banner_color}33;
                     display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
@@ -88,7 +88,7 @@ with tab1:
                 {verdict_badge}
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        """)
         
         # Formalisms Grid
         st.markdown("#### 🔬 Formalism Probability & Metric Matrix")
@@ -136,7 +136,7 @@ with tab2:
     df = pd.DataFrame(rows)
     st.dataframe(df, use_container_width=True, hide_index=True)
     
-    st.markdown("""
+    render_html("""
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem;">
         <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(0, 242, 254, 0.25); border-radius: 12px; padding: 1.2rem;">
             <div style="font-weight: 700; color: #00f2fe; margin-bottom: 6px;">⚡ Critical Divergence: Case TC-B3</div>
@@ -153,4 +153,4 @@ with tab2:
             </p>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """)

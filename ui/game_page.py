@@ -1,6 +1,6 @@
 import streamlit as st
 import matplotlib.pyplot as plt
-from ui.theme import render_page_header, render_cyber_card
+from ui.theme import render_page_header, render_cyber_card, render_html
 from modules.game.dock_game import simulate_dock_game
 from modules.game.benchmark_chart import run_benchmark, DEPTHS
 from modules.game.game_state import DOCK
@@ -91,7 +91,7 @@ with tab1:
             winner_color = "#00f2fe" if winner == "R1" else ("#b388ff" if winner == "R2" else "#94a3b8")
             winner_label = "AGV-1 (AlphaBeta MAX)" if winner == "R1" else ("AGV-2 (Adversary MIN)" if winner == "R2" else "DRAW / TIMEOUT")
             
-            st.markdown(f"""
+            render_html(f"""
             <div style="background: rgba(15, 23, 42, 0.85); border: 2px solid {winner_color}; border-radius: 14px; 
                         padding: 1.25rem 1.75rem; margin: 1.5rem 0; box-shadow: 0 0 25px {winner_color}44;
                         display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
@@ -107,11 +107,11 @@ with tab1:
                     DOCK OCCUPIED
                 </div>
             </div>
-            """, unsafe_allow_html=True)
+            """)
             
             # Show grid arena
             # Parse final positions from trace
-            st.markdown(render_arena_grid(DOCK if winner=="R1" else (3, 0), DOCK if winner=="R2" else (3, 3)), unsafe_allow_html=True)
+            render_html(render_arena_grid(DOCK if winner=="R1" else (3, 0), DOCK if winner=="R2" else (3, 3)))
             
             st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
             with st.expander("📜 Move-by-Move Plies History", expanded=True):
@@ -153,7 +153,7 @@ with tab2:
             
             st.pyplot(fig)
             
-            st.markdown("""
+            render_html("""
             <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 12px; padding: 1.2rem; margin-top: 1rem;">
                 <b style="color: #00f2fe;">Key Mathematical Insights:</b>
                 <ul style="color: #94a3b8; font-size: 0.9rem; margin-top: 0.5rem; line-height: 1.6;">
@@ -161,4 +161,4 @@ with tab2:
                     <li><b>Iterative Deepening Search (IDS)</b> incurs minimal redundant calculation overhead while providing immediate interruptibility (anytime-algorithm property) for real-time robotic deadlines.</li>
                 </ul>
             </div>
-            """, unsafe_allow_html=True)
+            """)

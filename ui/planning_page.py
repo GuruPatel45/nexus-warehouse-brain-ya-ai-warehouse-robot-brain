@@ -1,6 +1,6 @@
 import json
 import streamlit as st
-from ui.theme import render_page_header, render_cyber_card
+from ui.theme import render_page_header, render_cyber_card, render_html
 from modules.planning.state import WorldState, is_goal_satisfied
 from modules.planning.goal_stack_planner import plan_goal_stack, _infer_towers
 from modules.planning.nonlinear_planner import plan_nonlinear
@@ -144,9 +144,9 @@ if st.button("🚀 SYNTHESIZE & EXECUTE ROBOTIC PLANS", type="primary"):
         # Render visual layout preview
         prev_col1, prev_col2 = st.columns(2)
         with prev_col1:
-            st.markdown(render_block_tower(start_data, "Initial Physical Configuration"), unsafe_allow_html=True)
+            render_html(render_block_tower(start_data, "Initial Physical Configuration"))
         with prev_col2:
-            st.markdown(render_block_tower(goal_data, "Target Spatial Arrangement"), unsafe_allow_html=True)
+            render_html(render_block_tower(goal_data, "Target Spatial Arrangement"))
         
         st.markdown("<div style='height: 1.5rem;'></div>", unsafe_allow_html=True)
         
@@ -182,7 +182,7 @@ if st.button("🚀 SYNTHESIZE & EXECUTE ROBOTIC PLANS", type="primary"):
                         f'</div>'
                     )
                 steps_html = f'<div style="display: flex; flex-direction: column; gap: 8px; margin-top: 0.5rem;">{"".join(step_cards)}</div>'
-                st.markdown(steps_html, unsafe_allow_html=True)
+                render_html(steps_html)
             
             with st.expander("🔍 Deep Goal-Stack Symbolic Trace", expanded=False):
                 for line in trace:
@@ -210,7 +210,7 @@ if st.button("🚀 SYNTHESIZE & EXECUTE ROBOTIC PLANS", type="primary"):
                     f'<span style="font-family: monospace; font-weight: 600; color: #f8fafc;">{stage_content}</span>'
                     f'</div>'
                 )
-            st.markdown("".join(stage_htmls), unsafe_allow_html=True)
+            render_html("".join(stage_htmls))
         
         with tab3:
             st.markdown("#### 🧩 Hierarchical Task Network (HTN Decomposition)")
@@ -231,22 +231,20 @@ if st.button("🚀 SYNTHESIZE & EXECUTE ROBOTIC PLANS", type="primary"):
             
             if result["reactive_log"]:
                 for line in result["reactive_log"]:
-                    st.markdown(
+                    render_html(
                         f'<div style="background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; border-radius: 10px; padding: 0.8rem 1.2rem; margin-bottom: 0.6rem;">'
                         f'<b style="color: #f59e0b;">🛡️ REACTIVE REPAIR APPLIED:</b> <span style="color: #f8fafc;">{line}</span>'
-                        f'</div>',
-                        unsafe_allow_html=True
+                        f'</div>'
                     )
             else:
                 st.success("✅ Nominal Execution: No unforeseen disturbances breached preconditions.")
             
             sat = is_goal_satisfied(result['final_state'], goal_data)
             if sat:
-                st.markdown(
+                render_html(
                     '<div style="background: rgba(0, 245, 160, 0.15); border: 1px solid rgba(0, 245, 160, 0.4); border-radius: 10px; padding: 1rem; margin-top: 1rem; text-align: center;">'
                     '<span style="color: #00f5a0; font-weight: 800; font-size: 1.1rem;">🎯 GOAL FULLY RECOVERED & SATISFIED DESPITE SIMULATED DISTURBANCE</span>'
-                    '</div>',
-                    unsafe_allow_html=True
+                    '</div>'
                 )
             else:
                 st.error("❌ Physical goal was not satisfied.")

@@ -2,7 +2,7 @@ import streamlit as st
 import io
 import sys
 import pandas as pd
-from ui.theme import render_page_header, render_cyber_card
+from ui.theme import render_page_header, render_cyber_card, render_html
 from modules.integration.shift_log_generator import generate_shift_log
 from modules.integration.control_loop import run
 
@@ -87,14 +87,14 @@ if st.button("🚀 INITIALIZE AUTONOMOUS SHIFT SIMULATION", type="primary", use_
         for col, (etype, count) in zip(type_cols, event_types.items()):
             label, color = type_labels.get(etype, (etype, "#00f5a0"))
             with col:
-                st.markdown(f"""
+                render_html(f"""
                 <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.06); 
                             border-top: 3px solid {color}; border-radius: 10px; padding: 0.9rem; text-align: center;">
                     <div style="font-size: 0.8rem; color: #94a3b8; font-weight: 600;">{label}</div>
                     <div style="font-size: 1.6rem; font-weight: 800; color: {color}; margin-top: 2px;">{count}</div>
                     <div style="font-size: 0.75rem; color: #64748b;">{(count/len(events))*100:.1f}% of total</div>
                 </div>
-                """, unsafe_allow_html=True)
+                """)
                 
         st.markdown("<div style='height: 1.5rem;'></div>", unsafe_allow_html=True)
         
@@ -126,4 +126,4 @@ if st.button("🚀 INITIALIZE AUTONOMOUS SHIFT SIMULATION", type="primary", use_
             {'<br>'.join(formatted_lines)}
         </div>
         """
-        st.markdown(terminal_html, unsafe_allow_html=True)
+        render_html(terminal_html)

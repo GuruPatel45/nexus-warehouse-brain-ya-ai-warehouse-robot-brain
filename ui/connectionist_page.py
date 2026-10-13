@@ -1,7 +1,7 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
-from ui.theme import render_page_header, render_cyber_card
+from ui.theme import render_page_header, render_cyber_card, render_html
 from modules.connectionist.hopfield import (
     generate_pattern_1, generate_pattern_2, generate_pattern_3,
     generate_pattern_4, generate_pattern_5, generate_pattern_6,
@@ -91,11 +91,11 @@ with tab1:
         # Show LED Grids
         colA, colB, colC = st.columns(3)
         with colA:
-            st.markdown(render_led_matrix(original, "1. Ground Truth Prototype", "#00f2fe"), unsafe_allow_html=True)
+            render_html(render_led_matrix(original, "1. Ground Truth Prototype", "#00f2fe"))
         with colB:
-            st.markdown(render_led_matrix(corrupted, f"2. Corrupted Sensor Input ({int(flip_frac*100)}% Noise)", "#ff007a"), unsafe_allow_html=True)
+            render_html(render_led_matrix(corrupted, f"2. Corrupted Sensor Input ({int(flip_frac*100)}% Noise)", "#ff007a"))
         with colC:
-            st.markdown(render_led_matrix(recovered, "3. Attractor State Reconstructed", "#00f5a0"), unsafe_allow_html=True)
+            render_html(render_led_matrix(recovered, "3. Attractor State Reconstructed", "#00f5a0"))
             
         st.markdown("<div style='height: 1.5rem;'></div>", unsafe_allow_html=True)
         st.markdown("#### 📉 Lyapunov Energy Function Minimization")
@@ -131,13 +131,13 @@ with tab2:
             X, y = generate_synthetic_sequences(n=600, seq_len=10)
             model, train_losses = train_rnn(X, y, hidden_size=hidden_size, epochs=epochs, lr=0.01)
             
-            st.markdown(f"""
+            render_html(f"""
             <div style="background: rgba(0, 245, 160, 0.12); border: 1px solid rgba(0, 245, 160, 0.4); 
                         border-radius: 12px; padding: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
                 <span style="color: #00f5a0; font-weight: 800; font-size: 1.05rem;">✅ Model Convergence Achieved across {epochs} Epochs</span>
                 <span class="cyber-badge badge-emerald">FINAL LOSS: {train_losses[-1]:.4f}</span>
             </div>
-            """, unsafe_allow_html=True)
+            """)
             
             fig, ax = plt.subplots(figsize=(8, 3.2))
             ax.plot(train_losses, '-', color='#00f2fe', linewidth=2.5)
@@ -154,9 +154,9 @@ with tab2:
             st.pyplot(fig)
 
 with tab3:
-    st.markdown("""
-    ### ⚖️ Architectural Divergence: Static Attractors vs. Temporal Recurrence
+    st.markdown("### ⚖️ Architectural Divergence: Static Attractors vs. Temporal Recurrence")
     
+    render_html("""
     <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 14px; padding: 1.5rem; margin-top: 1rem;">
         <table style="width: 100%; border-collapse: collapse; color: #f8fafc; font-size: 0.95rem;">
             <thead>
@@ -190,4 +190,4 @@ with tab3:
             </tbody>
         </table>
     </div>
-    """, unsafe_allow_html=True)
+    """)

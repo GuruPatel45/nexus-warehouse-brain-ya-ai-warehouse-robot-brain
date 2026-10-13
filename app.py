@@ -1,6 +1,6 @@
 import streamlit as st
 import os
-from ui.theme import inject_theme
+from ui.theme import inject_theme, render_html
 
 st.set_page_config(
     page_title="NEXUS ROBOTICS // Warehouse Brain OS",
@@ -18,7 +18,7 @@ with st.sidebar:
     if os.path.exists(logo_path):
         st.image(logo_path, width=90)
     
-    st.markdown("""
+    render_html("""
     <div style="margin-bottom: 1.2rem;">
         <div style="display: flex; align-items: center; gap: 8px;">
             <h2 style="margin: 0; font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em;
@@ -47,7 +47,7 @@ with st.sidebar:
             <div>State: <b style="color: #f59e0b;">Nominal</b></div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """)
 
 # Define pages structure
 pages = {

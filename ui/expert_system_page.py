@@ -1,5 +1,5 @@
 import streamlit as st
-from ui.theme import render_page_header, render_cyber_card
+from ui.theme import render_page_header, render_cyber_card, render_html
 from modules.expert_system.rule_engine import diagnose, _load_rules
 from modules.expert_system.knowledge_acquisition import append_rule
 
@@ -54,7 +54,7 @@ with tab1:
             if diagnoses:
                 for d in diagnoses:
                     clean_diag = d.replace("diagnosis:", "").replace("_", " ").upper()
-                    st.markdown(f"""
+                    render_html(f"""
                     <div style="background: rgba(255, 0, 122, 0.15); border: 2px solid #ff007a; border-radius: 14px; 
                                 padding: 1.25rem 1.75rem; margin: 1.25rem 0; box-shadow: 0 0 25px rgba(255, 0, 122, 0.3);
                                 display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
@@ -70,16 +70,16 @@ with tab1:
                             INTERVENE IMMEDIATELY
                         </div>
                     </div>
-                    """, unsafe_allow_html=True)
+                    """)
             else:
-                st.markdown("""
+                render_html("""
                 <div style="background: rgba(0, 245, 160, 0.12); border: 2px solid #00f5a0; border-radius: 14px; 
                             padding: 1.25rem 1.75rem; margin: 1.25rem 0; text-align: center;">
                     <div style="color: #00f5a0; font-weight: 800; font-size: 1.2rem;">
                         ✅ NO FAULT DETECTED // HARDWARE WITHIN SPECIFICATION
                     </div>
                 </div>
-                """, unsafe_allow_html=True)
+                """)
                 
             st.markdown("#### 🔍 Symbolic Explanation Trace (Inference Tree)")
             if result["trace"]:
@@ -95,7 +95,7 @@ with tab1:
                     </div>
                     """
                 trace_html += "</div>"
-                st.markdown(trace_html, unsafe_allow_html=True)
+                render_html(trace_html)
             else:
                 st.info("No inference rules triggered with the given symptom set.")
                 
@@ -135,10 +135,10 @@ with tab3:
     
     for r in rules:
         with st.expander(f"🔹 [{r['id']}] {r['explanation']}"):
-            st.markdown(f"""
+            render_html(f"""
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 1.6; color: #f8fafc;">
                 <b style="color: #00f2fe;">IF</b> {r['if']}<br>
                 <b style="color: #ff007a;">NOT</b> {r.get('not', [])}<br>
                 <b style="color: #00f5a0;">THEN</b> {r['then']}
             </div>
-            """, unsafe_allow_html=True)
+            """)
